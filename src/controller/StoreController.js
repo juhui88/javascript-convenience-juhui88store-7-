@@ -5,12 +5,19 @@ import ConveniencStore from "../models/ConveniencStore.js";
 import AnswerValidator from "../utils/AnswerValidator.js";
 import FormatUtils from "../utils/FormatUtils.js";
 import InputView from "../views/InputView.js";
+import OutputView from "../views/OutputView.js";
 import BuyController from "./BuyConstroller.js";
 
 class StoreController {
   constructor() {
     this.store = new ConveniencStore();
     this.shoppingList = [];
+    this.total = {
+      price: 0,
+      promotionDiscount: 0,
+      quantity: 0,
+      memebrshipDiscount: 0,
+    };
   }
 
   async run() {
@@ -18,6 +25,7 @@ class StoreController {
       this.initializeList();
       this.store.showInventory();
       await this.buy();
+      OutputView.printReceipt(this.shoppingList, this.total);
     } while (await this.#confirmAdditionalBuy());
   }
 
@@ -34,13 +42,73 @@ class StoreController {
     const input = await InputView.readInput(ViewMessage.READ_ITEM_MESSAGE);
     const buyList = this.#getItemsToBuy(input);
 
-    buyList.forEach((item) => {
+    for (const item of buyList) {
       const buyProducts = this.store.findProduct(item.name);
-      this.#validateBuyProduct(buyProducts);
+      this.#validateBuyProduct(buyProducts, item.quantity);
       const buyController = new BuyController(buyProducts, item.quantity);
-      const { finalQty, freeQty } = buyController.run(); // 최종 구매수량과 증정수량 반환
-      this.shoppingList.push({ name: item.name, finalQty, freeQty });
+      const { finalQty, freeQty, promotionQty, price } =
+        await buyController.run(); // 최종 구매수량과 증정수량 반환
+
+      this.shoppingList.push({
+        name: item.name,
+        finalQty,
+        freeQty,
+        price,
+        promotionQty,
+      });
+    }
+    await this.#setTotal();
+  }
+
+  async #setTotal() {
+    let totalPrice = 0;
+    let discount = 0;
+    let totalQuantity = 0;
+    let memberShip = 0;
+
+    const answer = await this.#confirmMembershipDiscount();
+
+    this.shoppingList.forEach((item) => {
+      const { itemTotalPrice, itemDiscount, itemQuantity, itemMemberShip } =
+        this.#calculateTotal(item, answer);
+
+      totalPrice += itemTotalPrice;
+      discount += itemDiscount;
+      totalQuantity += itemQuantity;
+      memberShip += itemMemberShip;
     });
+
+    if (memberShip > 8000) memberShip = 8000;
+
+    this.total = {
+      price: totalPrice,
+      promotionDiscount: discount,
+      quantity: totalQuantity,
+      memebrshipDiscount: memberShip,
+    };
+  }
+
+  #calculateTotal(item, answer) {
+    const { finalQty, freeQty, promotionQty, price } = item;
+
+    const itemTotalPrice = price * finalQty;
+    const itemQuantity = finalQty;
+    const itemDiscount = price * freeQty;
+    const itemMemberShip = answer ? (finalQty - promotionQty) * price * 0.3 : 0;
+
+    return {
+      itemTotalPrice,
+      itemDiscount,
+      itemQuantity,
+      itemMemberShip,
+    };
+  }
+
+  async #confirmMembershipDiscount() {
+    const answer = AnswerValidator.validate(
+      await InputView.askMembershipDiscount()
+    );
+    return answer;
   }
 
   #validateBuyProduct(buyProducts, itemQuantity) {

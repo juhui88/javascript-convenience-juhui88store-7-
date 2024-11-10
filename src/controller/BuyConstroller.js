@@ -7,12 +7,11 @@ import InputView from "../views/InputView.js";
 class BuyController {
   #promotions = DataLoader.getPromotions("./public/promotions.md");
 
-  constructor(buyProducts, buyQuantity) {
+  constructor(buyProducts, buyQty) {
     this.buyProducts = this.#sortByPromotion(buyProducts);
     this.freeQty = 0;
-    this.buyQuantity = buyQuantity;
-    this.remainQty = buyQuantity;
-    this.nonPromotionQtys = [];
+    this.buyQty = Number(buyQty);
+    this.remainQty = Number(buyQty);
   }
 
   async run() {
@@ -21,34 +20,76 @@ class BuyController {
 
       if (promotion !== undefined && promotion.isApplicable()) {
         this.#applyPromotion(product, promotion);
-        const result = await this.#resultPromotionLogic(product, promotion);
+        const result = await this.#getResultPromotionLogic(product, promotion);
+
         if (result !== false) return result;
       } else {
-        if (this.buyProducts.length === 1) {
-          product.reduceQuantity(this.buyQuantity);
-          this.remainQty -= this.buyQuantity;
-          return { finalQty: this.buyQuantity, freeQty };
-        }
-
-        const nonPromotionQty = this.nonPromotionQtys.reduce(
-          (total, qty) => total + qty,
-          0
-        );
+        return await this.#getResultNonPromotionLogic(product);
       }
     }
   }
 
-  async #resultPromotionLogic(product, promotion) {
-    if (this.remainQty === 0) {
+  async #getResultNonPromotionLogic(product) {
+    if (this.buyProducts.length === 1) {
+      product.reduceQuantity(this.buyQty);
       return {
-        finalQty: this.buyQuantity,
-        freeQty,
+        price: product.price,
+        finalQty: this.buyQty,
+        freeQty: this.freeQty,
+        promotionQty: this.buyQty - this.remainQty,
       };
     }
-    if (this.remainQty > product.quantity) {
-      this.nonPromotionQtys.push(this.remainQty);
-      return false;
+
+    return await this.#confirmBuyNonPromotionL(product);
+  }
+
+  async #confirmBuyNonPromotionL(product) {
+    const answer = AnswerValidator.validate(
+      await InputView.askBuyNonPromotion(product.name, this.remainQty)
+    );
+
+    if (answer) {
+      return this.#reAdjustQty(product);
+    } else {
+      return {
+        price: product.price,
+        finalQty: this.buyQty - remainQty,
+        freeQty: this.freeQty,
+        promotionQty: this.buyQty - this.remainQty,
+      };
     }
+  }
+
+  async #reAdjustQty(product) {
+    const nonPromotionQty = this.remainQty;
+    for (let i = 0; i <= this.buyProducts.length; i++) {
+      if (this.remainQty >= this.buyProducts[i].quantity) {
+        this.remainQty -= this.buyProducts[i].quantity;
+        this.buyProducts[i].reduceQuantity(this.buyProducts[i].quantity);
+      } else {
+        this.buyProducts[i].reduceQuantity(this.remainQty);
+        this.remainQty -= this.remainQty;
+      }
+      if (this.remainQty === 0)
+        return {
+          price: product.price,
+          finalQty: this.buyQty,
+          freeQty: this.freeQty,
+          promotionQty: this.buyQty - nonPromotionQty,
+        };
+    }
+  }
+
+  async #getResultPromotionLogic(product, promotion) {
+    if (this.remainQty === 0) {
+      return {
+        price: product.price,
+        finalQty: this.buyQty,
+        freeQty: this.freeQty,
+        promotionQty: this.buyQty,
+      };
+    }
+    if (this.remainQty > product.quantity) return false;
     if (
       this.remainQty === promotion.buy &&
       this.remainQty <= product.quantity
@@ -56,21 +97,26 @@ class BuyController {
       return await this.#confirmAdditionalPromotion(product, promotion);
     }
   }
+
   async #confirmAdditionalPromotion(product, promotion) {
     const answer = AnswerValidator.validate(
       await InputView.askAdditionalPromotion(product.name, promotion.get)
     );
     if (answer) {
-      product.reduceQuantity(promotion.get);
+      product.reduceQuantity(this.remainQty + promotion.get);
       return {
-        finalQty: this.buyQuantity + promotion.get,
+        price: product.price,
+        finalQty: this.buyQty + promotion.get,
         freeQty: this.freeQty + promotion.get,
+        promotionQty: this.buyQty - this.remainQty,
       };
     } else {
       product.reduceQuantity(this.remainQty);
       return {
-        finalQty: this.buyQuantity,
+        price: product.price,
+        finalQty: this.buyQty,
         freeQty: this.freeQty,
+        promotionQty: this.buyQty - this.remainQty,
       };
     }
   }
