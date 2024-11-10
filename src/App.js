@@ -1,9 +1,14 @@
-import ConveniencStore from "./models/ConveniencStore.js";
+import { MissionUtils } from "@woowacourse/mission-utils";
+import StoreController from "./controller/StoreController.js";
 
 class App {
   async run() {
-    const store = new ConveniencStore();
-    store.showInventory();
+    try {
+      const storeController = new StoreController();
+      await storeController.run();
+    } catch (error) {
+      MissionUtils.Console.print(error.message);
+    }
   }
 }
 

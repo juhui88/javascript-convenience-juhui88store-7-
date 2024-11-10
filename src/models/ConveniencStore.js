@@ -5,7 +5,6 @@ import OutputView from "../views/OutputView.js";
 class ConveniencStore {
   constructor() {
     this.products = DataLoader.getProducts("./public/products.md");
-    this.promotions = DataLoader.getPromotions("./public/promotions.md");
   }
 
   showInventory() {
@@ -17,10 +16,6 @@ class ConveniencStore {
 
   findProduct(name) {
     return this.products.find((product) => product.name === name);
-  }
-
-  findPromotion(name) {
-    return this.promotions.find((promo) => promo.name === name);
   }
 }
 
