@@ -15,7 +15,7 @@ class ConveniencStore {
   }
 
   findProduct(name) {
-    return this.products.find((product) => product.name === name);
+    return this.products.filter((product) => product.name === name);
   }
 }
 

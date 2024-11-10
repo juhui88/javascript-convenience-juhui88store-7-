@@ -13,10 +13,16 @@ class Promotion {
     return currentDate >= this.startDate && currentDate <= this.endDate;
   }
 
-  calculatePromotionSets(buyQuantity) {
-    const setCount = Math.floor(buyQuantity / (this.buy + this.get));
-    const remainder = buyQuantity % (this.buy + this.get);
-    return { setCount, remainder };
+  calculateQtyAfterPromotion(buyQty, productQty) {
+    let setCount;
+    if (buyQty <= productQty) {
+      setCount = Math.floor(buyQty / (this.buy + this.get));
+    } else {
+      setCount = Math.floor(productQty / (this.buy + this.get));
+    }
+    const freeQty = setCount * this.get;
+    const promotionQty = setCount * (this.buy + this.get);
+    return { freeQty, promotionQty };
   }
 }
 

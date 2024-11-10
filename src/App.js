@@ -8,6 +8,7 @@ class App {
       await storeController.run();
     } catch (error) {
       MissionUtils.Console.print(error.message);
+      throw error;
     }
   }
 }

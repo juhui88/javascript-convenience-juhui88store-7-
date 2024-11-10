@@ -1,5 +1,8 @@
+import ERROR_MESSAGE from "../constants/ErrorMessage.js";
+import ANSWER from "../constants/InputMessage.js";
 import ViewMessage from "../constants/ViewMessage.js";
 import ConveniencStore from "../models/ConveniencStore.js";
+import AnswerValidator from "../utils/AnswerValidator.js";
 import FormatUtils from "../utils/FormatUtils.js";
 import InputView from "../views/InputView.js";
 import BuyController from "./BuyConstroller.js";
@@ -15,7 +18,12 @@ class StoreController {
       this.initializeList();
       this.store.showInventory();
       await this.buy();
-    } while (조건);
+    } while (await this.#confirmAdditionalBuy());
+  }
+
+  async #confirmAdditionalBuy() {
+    const input = await InputView.askAdditionalBuy();
+    return AnswerValidator.validate(input);
   }
 
   initializeList() {
@@ -26,16 +34,31 @@ class StoreController {
     const input = await InputView.readInput(ViewMessage.READ_ITEM_MESSAGE);
     const buyList = this.#getItemsToBuy(input);
 
-    const buyController = new BuyController(buyList);
-    console.log(buyList);
-    buyController.run();
+    buyList.forEach((item) => {
+      const buyProducts = this.store.findProduct(item.name);
+      this.#validateBuyProduct(buyProducts);
+      const buyController = new BuyController(buyProducts, item.quantity);
+      const { finalQty, freeQty } = buyController.run(); // 최종 구매수량과 증정수량 반환
+      this.shoppingList.push({ name: item.name, finalQty, freeQty });
+    });
+  }
+
+  #validateBuyProduct(buyProducts, itemQuantity) {
+    if (buyProducts === undefined) throw new Error(ERROR_MESSAGE.DONT_EXIST);
+    if (this.#getProductTotalQTY(buyProducts) < itemQuantity)
+      throw new Error(ERROR_MESSAGE.EXCEED_INVENTORY_QUANTITY);
+  }
+
+  #getProductTotalQTY(buyProducts) {
+    return buyProducts.reduce((total, product) => total + product.quantity, 0);
   }
 
   #getItemsToBuy(input) {
     return FormatUtils.splitByComma(input).map((string) => {
       this.#validateBuyInput(string);
       const [name, quantity] = FormatUtils.splitByDashSlice(1, -1, string);
-      return { name, quantity: this.#validateParseQuantity(quantity) };
+      this.#validateParseQuantity(quantity);
+      return { name, quantity };
     });
   }
 
