@@ -1,5 +1,3 @@
-import ERROR_MESSAGE from "../constants/ErrorMessage.js";
-import ANSWER from "../constants/InputMessage.js";
 import AnswerValidator from "../utils/AnswerValidator.js";
 import DataLoader from "../utils/DataLoader.js";
 import InputView from "../views/InputView.js";
