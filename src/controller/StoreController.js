@@ -1,5 +1,4 @@
 import ERROR_MESSAGE from "../constants/ErrorMessage.js";
-import ANSWER from "../constants/InputMessage.js";
 import ViewMessage from "../constants/ViewMessage.js";
 import ConvenienceStore from "../models/ConvenienceStore.js";
 import AnswerValidator from "../utils/AnswerValidator.js";
@@ -22,9 +21,9 @@ class StoreController {
 
   async run() {
     do {
-      this.initializeList();
+      this.#initializeList();
       this.store.showInventory();
-      await this.buy();
+      await this.#buy();
       OutputView.printReceipt(this.shoppingList, this.total);
     } while (await this.#confirmAdditionalBuy());
   }
@@ -34,11 +33,11 @@ class StoreController {
     return AnswerValidator.validate(input);
   }
 
-  initializeList() {
+  #initializeList() {
     this.shoppingList = [];
   }
 
-  async buy() {
+  async #buy() {
     const input = await InputView.readInput(ViewMessage.READ_ITEM_MESSAGE);
     const buyList = this.#getItemsToBuy(input);
 
