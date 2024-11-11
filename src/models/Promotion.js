@@ -9,7 +9,8 @@ class Promotion {
     this.endDate = new Date(endDate);
   }
 
-  isApplicable(currentDate = new Date(MissionUtils.DateTimes.now())) {
+  isApplicable() {
+    const currentDate = new Date(MissionUtils.DateTimes.now());
     return currentDate >= this.startDate && currentDate <= this.endDate;
   }
 

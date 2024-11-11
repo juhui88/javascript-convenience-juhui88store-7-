@@ -17,21 +17,25 @@ class BuyController {
   async run() {
     for (const product of this.buyProducts) {
       const promotion = this.findPromotion(product.promotion);
-
       if (promotion !== undefined && promotion.isApplicable()) {
         this.#applyPromotion(product, promotion);
-        const result = await this.#getResultPromotionLogic(product, promotion);
+        const promotionResult = await this.#getResultPromotionLogic(
+          product,
+          promotion
+        );
 
-        if (result !== false) return result;
-      } else {
-        return await this.#getResultNonPromotionLogic(product);
+        if (promotionResult !== false) return result;
       }
+      const nonPromotionResult = await this.#getResultNonPromotionLogic(
+        product
+      );
+      if (nonPromotionResult !== false) return nonPromotionResult;
     }
   }
 
   async #getResultNonPromotionLogic(product) {
-    if (this.buyProducts.length === 1) {
-      product.reduceQuantity(this.buyQty);
+    if (product.hasSufficientQuantity(this.remainQty)) {
+      product.reduceQuantity(this.remainQty);
       return {
         price: product.price,
         finalQty: this.buyQty,
@@ -40,10 +44,17 @@ class BuyController {
       };
     }
 
-    return await this.#confirmBuyNonPromotionL(product);
+    if (this.freeQty === 0) {
+      this.remainQty -= product.quantity;
+      product.reduceQuantity(product.quantity);
+
+      return false;
+    }
+
+    return await this.#confirmBuyNonPromotion(product);
   }
 
-  async #confirmBuyNonPromotionL(product) {
+  async #confirmBuyNonPromotion(product) {
     const answer = AnswerValidator.validate(
       await InputView.askBuyNonPromotion(product.name, this.remainQty)
     );
@@ -63,12 +74,12 @@ class BuyController {
   async #reAdjustQty(product) {
     const nonPromotionQty = this.remainQty;
     for (let i = 0; i <= this.buyProducts.length; i++) {
-      if (this.remainQty >= this.buyProducts[i].quantity) {
-        this.remainQty -= this.buyProducts[i].quantity;
-        this.buyProducts[i].reduceQuantity(this.buyProducts[i].quantity);
-      } else {
+      if (this.buyProducts[i].hasSufficientQuantity(this.remainQty)) {
         this.buyProducts[i].reduceQuantity(this.remainQty);
         this.remainQty -= this.remainQty;
+      } else {
+        this.remainQty -= this.buyProducts[i].quantity;
+        this.buyProducts[i].reduceQuantity(this.buyProducts[i].quantity);
       }
       if (this.remainQty === 0)
         return {

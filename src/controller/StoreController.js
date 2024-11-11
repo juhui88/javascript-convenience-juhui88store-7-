@@ -112,7 +112,8 @@ class StoreController {
   }
 
   #validateBuyProduct(buyProducts, itemQuantity) {
-    if (buyProducts === undefined) throw new Error(ERROR_MESSAGE.DONT_EXIST);
+    if (buyProducts.length === 0) throw new Error(ERROR_MESSAGE.DONT_EXIST);
+
     if (this.#getProductTotalQTY(buyProducts) < itemQuantity)
       throw new Error(ERROR_MESSAGE.EXCEED_INVENTORY_QUANTITY);
   }
