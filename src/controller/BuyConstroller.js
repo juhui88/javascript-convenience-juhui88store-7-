@@ -21,7 +21,6 @@ class BuyController {
           product,
           promotion
         );
-
         if (promotionResult !== false) return promotionResult;
       }
       const nonPromotionResult = await this.#getResultNonPromotionLogic(
@@ -41,14 +40,6 @@ class BuyController {
         promotionQty: this.buyQty - this.remainQty,
       };
     }
-
-    if (this.freeQty === 0) {
-      this.remainQty -= product.quantity;
-      product.reduceQuantity(product.quantity);
-
-      return false;
-    }
-
     return await this.#confirmBuyNonPromotion(product);
   }
 
@@ -102,9 +93,9 @@ class BuyController {
       return await this.#confirmBuyNonPromotion(product);
     if (this.remainQty > product.quantity) return false;
     if (this.remainQty === promotion.buy) {
-      if (product.hasSufficientQuantity(this.remainQty + promotion.get))
+      if (product.hasSufficientQuantity(this.remainQty + promotion.get)) {
         return await this.#confirmAdditionalPromotion(product, promotion);
-      else return await this.#confirmBuyNonPromotion(product);
+      } else return await this.#confirmBuyNonPromotion(product);
     }
     return false;
   }

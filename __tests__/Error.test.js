@@ -96,6 +96,7 @@ describe("편의점", () => {
         "Y",
         "Y",
         "Y",
+        "Y",
       ],
       expectedErrorMessage: ERROR_MESSAGE.STORE_NO_STOCK,
     });
