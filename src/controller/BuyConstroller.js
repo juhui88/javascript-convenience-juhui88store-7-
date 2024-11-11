@@ -101,11 +101,10 @@ class BuyController {
     if (this.remainQty < promotion.buy)
       return await this.#confirmBuyNonPromotion(product);
     if (this.remainQty > product.quantity) return false;
-    if (
-      this.remainQty === promotion.buy &&
-      this.remainQty + promotion.get <= product.quantity
-    ) {
-      return await this.#confirmAdditionalPromotion(product, promotion);
+    if (this.remainQty === promotion.buy) {
+      if (product.hasSufficientQuantity(this.remainQty + promotion.get))
+        return await this.#confirmAdditionalPromotion(product, promotion);
+      else return await this.#confirmBuyNonPromotion(product);
     }
     return false;
   }
