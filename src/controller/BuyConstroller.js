@@ -24,7 +24,7 @@ class BuyController {
           promotion
         );
 
-        if (promotionResult !== false) return result;
+        if (promotionResult !== false) return promotionResult;
       }
       const nonPromotionResult = await this.#getResultNonPromotionLogic(
         product
@@ -64,7 +64,7 @@ class BuyController {
     } else {
       return {
         price: product.price,
-        finalQty: this.buyQty - remainQty,
+        finalQty: this.buyQty - this.remainQty,
         freeQty: this.freeQty,
         promotionQty: this.buyQty - this.remainQty,
       };

@@ -16,7 +16,7 @@ class Product {
     return promotion;
   }
   getFormatQtyAndPromotion() {
-    if (this.quantity === 0) return ["재고 없음", ""];
+    if (this.quantity === 0) return ["재고 없음", this.promotion];
     if (this.promotion === null) return [`${this.quantity}개`, ""];
     return [`${this.quantity}개`, this.promotion];
   }

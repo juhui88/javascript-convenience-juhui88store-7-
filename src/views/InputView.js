@@ -1,5 +1,5 @@
 import { MissionUtils } from "@woowacourse/mission-utils";
-import ViewMessage from "../constants/ViewMessage";
+import ViewMessage from "../constants/ViewMessage.js";
 
 class InputView {
   static async readInput(message) {
@@ -16,7 +16,7 @@ class InputView {
 
   static async askBuyNonPromotion(name, nontPromotionQty) {
     const input = await MissionUtils.Console.readLineAsync(
-      ViewMessage.BUY_NONPROMOTION_MESSAGE(name, nontPromotionQty)
+      `현재 ${name} ${nontPromotionQty}개는 프로모션 할인이 적용되지 않습니다. 그래도 구매하시겠습니까? (Y/N)\n`
     );
     return input;
   }
