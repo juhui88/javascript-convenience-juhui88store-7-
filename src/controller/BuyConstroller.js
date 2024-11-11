@@ -81,7 +81,7 @@ class BuyController {
         this.remainQty -= this.buyProducts[i].quantity;
         this.buyProducts[i].reduceQuantity(this.buyProducts[i].quantity);
       }
-      if (this.remainQty === 0)
+      if (this.remainQty <= 0)
         return {
           price: product.price,
           finalQty: this.buyQty,
@@ -100,6 +100,8 @@ class BuyController {
         promotionQty: this.buyQty,
       };
     }
+    if (this.remainQty < promotion.buy)
+      return await this.#confirmBuyNonPromotion(product);
     if (this.remainQty > product.quantity) return false;
     if (
       this.remainQty === promotion.buy &&
@@ -107,6 +109,7 @@ class BuyController {
     ) {
       return await this.#confirmAdditionalPromotion(product, promotion);
     }
+    return false;
   }
 
   async #confirmAdditionalPromotion(product, promotion) {
@@ -119,7 +122,7 @@ class BuyController {
         price: product.price,
         finalQty: this.buyQty + promotion.get,
         freeQty: this.freeQty + promotion.get,
-        promotionQty: this.buyQty - this.remainQty,
+        promotionQty: this.buyQty + promotion.get,
       };
     } else {
       product.reduceQuantity(this.remainQty);
