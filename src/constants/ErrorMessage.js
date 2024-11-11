@@ -6,6 +6,8 @@ const ERROR_MESSAGE = {
   EXCEED_INVENTORY_QUANTITY:
     "[ERROR] 재고 수량을 초과하여 구매할 수 없습니다. 다시 입력해 주세요.",
   INVALID_INPUT: "[ERROR] 잘못된 입력입니다. 다시 입력해 주세요.",
+  DONT_EXIST: "[ERROR] 잘못된 입력입니다. 다시 입력해 주세요.",
+  STORE_NO_STOCK: "[ERROR] 편의점의 모든 재고를 소진하였습니다.",
 };
 
 export default ERROR_MESSAGE;

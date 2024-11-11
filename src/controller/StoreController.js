@@ -25,7 +25,10 @@ class StoreController {
       this.store.showInventory();
       await this.#buy();
       OutputView.printReceipt(this.shoppingList, this.total);
-    } while (await this.#confirmAdditionalBuy());
+    } while (
+      (await this.#confirmAdditionalBuy()) &&
+      this.store.validateTotalQty()
+    );
   }
 
   async #confirmAdditionalBuy() {
