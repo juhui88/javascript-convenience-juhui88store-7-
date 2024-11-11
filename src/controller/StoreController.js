@@ -1,7 +1,7 @@
 import ERROR_MESSAGE from "../constants/ErrorMessage.js";
 import ANSWER from "../constants/InputMessage.js";
 import ViewMessage from "../constants/ViewMessage.js";
-import ConveniencStore from "../models/ConveniencStore.js";
+import ConvenienceStore from "../models/ConvenienceStore.js";
 import AnswerValidator from "../utils/AnswerValidator.js";
 import FormatUtils from "../utils/FormatUtils.js";
 import InputView from "../views/InputView.js";
@@ -10,7 +10,7 @@ import BuyController from "./BuyConstroller.js";
 
 class StoreController {
   constructor() {
-    this.store = new ConveniencStore();
+    this.store = new ConvenienceStore();
     this.shoppingList = [];
     this.total = {
       price: 0,

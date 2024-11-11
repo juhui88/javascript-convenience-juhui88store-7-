@@ -2,7 +2,7 @@ import ViewMessage from "../constants/ViewMessage.js";
 import DataLoader from "../utils/DataLoader.js";
 import OutputView from "../views/OutputView.js";
 
-class ConveniencStore {
+class ConvenienceStore {
   constructor() {
     this.products = DataLoader.getProducts("./public/products.md");
   }
@@ -19,4 +19,4 @@ class ConveniencStore {
   }
 }
 
-export default ConveniencStore;
+export default ConvenienceStore;
