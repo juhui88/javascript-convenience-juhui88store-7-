@@ -84,4 +84,18 @@ describe("편의점", () => {
       expectedErrorMessage: ERROR_MESSAGE.INVALID_INPUT,
     });
   });
+  test("예외 테스트 - 편의점 모든 재고 소진", async () => {
+    await runExceptions({
+      inputs: [
+        "[콜라-20],[사이다-15],[오렌지주스-9],[탄산수-5],[물-10],[비타민워터-6],[감자칩-10],[초코바-10],[에너지바-5],[정식도시락-8],[컵라면-11]",
+        "Y",
+        "Y",
+        "Y",
+        "Y",
+        "Y",
+        "Y",
+      ],
+      expectedErrorMessage: ERROR_MESSAGE.STORE_NO_STOCK,
+    });
+  });
 });

@@ -105,7 +105,7 @@ class BuyController {
     if (this.remainQty > product.quantity) return false;
     if (
       this.remainQty === promotion.buy &&
-      this.remainQty <= product.quantity
+      this.remainQty + promotion.get <= product.quantity
     ) {
       return await this.#confirmAdditionalPromotion(product, promotion);
     }
